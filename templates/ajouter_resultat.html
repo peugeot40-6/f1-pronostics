@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter un Résultat</title>
+</head>
+<body>
+    <nav>
+        <a href="/">Accueil</a> |
+        <a href="/ajouter_pronostic">Ajouter un pronostic</a> |
+        <a href="/ajouter_resultat">Ajouter un résultat</a>
+    </nav>
+    <h1>Ajouter un Résultat</h1>
+    <form method="POST">
+        <label>Grand Prix :</label>
+        <select name="grand_prix">
+            {% for gp in grands_prix %}
+                <option value="{{ gp }}">{{ gp }}</option>
+            {% endfor %}
+        </select><br>
+        {% for i in range(1, 11) %}
+            <label>Position {{ i }} :</label>
+            <select name="pos{{ i }}">
+                {% for pilote in pilotes %}
+                    <option value="{{ pilote }}">{{ pilote }}</option>
+                {% endfor %}
+            </select><br>
+        {% endfor %}
+        <input type="submit" value="Enregistrer">
+    </form>
+</body>
+</html>
