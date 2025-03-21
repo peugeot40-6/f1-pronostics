@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion</title>
+</head>
+<body>
+    <h2>Bienvenue sur les Pronostics F1 ! 🚀</h2>
+    <p>Veuillez entrer votre nom pour continuer :</p>
+    
+    {% if erreur %}
+        <p style="color: red;">{{ erreur }}</p>
+    {% endif %}
+
+    <form method="POST">
+        <input type="text" name="nom" placeholder="Entrez votre nom" required>
+        <button type="submit">Se connecter</button>
+    </form>
+</body>
+</html>
