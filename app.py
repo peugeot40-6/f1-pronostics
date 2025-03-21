@@ -1,5 +1,22 @@
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, session
+
+app = Flask(__name__)
+app.secret_key = "secret_key"  # Nécessaire pour gérer la session
+
+UTILISATEURS_AUTORISES = ["Amandine", "Sacha", "Padre"]
+
+@app.route("/", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        nom = request.form.get("nom")
+        if nom in UTILISATEURS_AUTORISES:
+            session["nom"] = nom
+            return redirect(url_for("accueil"))  # Redirige vers la page principale
+        else:
+            return render_template("login.html", erreur="Nom invalide. Essayez encore.")
+    return render_template("login.html")
+
 import os
 template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=template_dir)
