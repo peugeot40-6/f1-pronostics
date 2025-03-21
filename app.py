@@ -106,8 +106,21 @@ def indes():
     except Exception as e:
         return f"Erreur lors du chargement de l'accueil : {e}"
 
-@app.route('/ajouter_pronostic', methods=['GET', 'POST'])
+from functools import wraps
+
+def login_requis(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "nom" not in session:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route("/ajouter_pronostic", methods=["GET", "POST"])
+@login_requis
 def ajouter_pronostic():
+    nom_utilisateur = session["nom"]
+    # Logique pour ajouter un pronostic en vérifiant que l'utilisateur n'en modifie pas un autre
     if request.method == 'POST':
         if 'grand_prix' in request.form and 'participant' in request.form:
             gp = request.form['grand_prix']
