@@ -84,7 +84,7 @@ def login():
      if "nom" in session:
         return redirect(url_for("accueil"))  # Redirige directement si déjà connecté
 
-    if request.method == "POST":
+     if request.method == "POST":
         nom = request.form.get("nom")
         if nom in UTILISATEURS_AUTORISES:
             session["nom"] = nom
