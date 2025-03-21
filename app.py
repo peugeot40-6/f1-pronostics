@@ -1,3 +1,5 @@
+app.secret_key = "mon_super_secret_key"  # Mets une clé plus sécurisée
+
 import os
 from flask import Flask, render_template, request, redirect, url_for, session
 
@@ -77,7 +79,19 @@ def lire_csv_utf8(fichier):
     return pd.read_csv(fichier, encoding="utf-8", on_bad_lines='skip')  # Ignore les lignes mal formatées
 
 
-@app.route('/')
+@app.route("/", methods=["GET", "POST"])
+def login():
+     if "nom" in session:
+        return redirect(url_for("accueil"))  # Redirige directement si déjà connecté
+
+    if request.method == "POST":
+        nom = request.form.get("nom")
+        if nom in UTILISATEURS_AUTORISES:
+            session["nom"] = nom
+            return redirect(url_for("accueil"))  # Redirige vers la page principale
+        else:
+            return render_template("login.html", erreur="Nom invalide. Essayez encore.")
+    return render_template("login.html")
 def indes():
     try:
         df_classement = pd.read_csv("classement.csv", encoding="utf-8", on_bad_lines="skip")
@@ -115,6 +129,11 @@ def login_requis(f):
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated_function
+@app.route("/accueil")
+@login_requis
+def accueil():
+    nom_utilisateur = session.get("nom", "Inconnu")  # Récupère le nom de session
+    return render_template("accueil.html", nom=nom_utilisateur)
 
 @app.route("/ajouter_pronostic", methods=["GET", "POST"])
 @login_requis
