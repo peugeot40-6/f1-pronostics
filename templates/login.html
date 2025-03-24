@@ -9,8 +9,8 @@
     <h2>Bienvenue sur les Pronostics F1 ! 🚀</h2>
     <p>Veuillez entrer votre nom pour continuer :</p>
     
-    {% if erreur %}
-        <p style="color: red;">{{ erreur }}</p>
+    {% if message %}
+        <p style="color: red;">{{ message }}</p>
     {% endif %}
 
     <form method="POST">
