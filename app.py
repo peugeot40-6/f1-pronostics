@@ -1,144 +1,128 @@
-app.secret_key = "mon_super_secret_key"  # Mets une clé plus sécurisée
-
-import os
 from flask import Flask, render_template, request, redirect, url_for, session
-
-app = Flask(__name__)
-app.secret_key = "secret_key"  # Nécessaire pour gérer la session
-
-UTILISATEURS_AUTORISES = ["Amandine", "Sacha", "Padre"]
-
-@app.route("/", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        nom = request.form.get("nom")
-        if nom in UTILISATEURS_AUTORISES:
-            session["nom"] = nom
-            return redirect(url_for("accueil"))  # Redirige vers la page principale
-        else:
-            return render_template("login.html", erreur="Nom invalide. Essayez encore.")
-    return render_template("login.html")
-
-import os
-template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-app = Flask(__name__, template_folder=template_dir)
-
 import pandas as pd
-
-# Charger les données
-df_classement = pd.read_csv("classement.csv", encoding="utf-8", on_bad_lines="skip")
-
-# Vérifier s'il y a des données
-if not df_classement.empty:
-    # Trouver le dernier Grand Prix en fonction de l'ordre d'apparition dans le fichier
-    dernier_gp = df_classement["Grand Prix"].iloc[-1]  # Prend le dernier GP inscrit
-    classement_dernier_gp = df_classement[df_classement["Grand Prix"] == dernier_gp]
-else:
-    classement_dernier_gp = pd.DataFrame()  # Tableau vide si aucun GP n'est trouvé
-
-def nettoyer_resultats_csv():
-    try:
-        if not os.path.exists("resultats.csv"):
-            print("Le fichier resultats.csv n'existe pas.")
-            return
-
-        df = pd.read_csv("resultats.csv", encoding='utf-8')
-
-        # Afficher les colonnes disponibles pour débogage
-        print("Colonnes disponibles dans resultats.csv:", df.columns.tolist())
-
-        # Vérifier si la colonne "Grand Prix" est bien présente
-        if "Grand Prix" not in df.columns:
-            raise KeyError("La colonne 'Grand Prix' est introuvable dans resultats.csv")
-
-        # Nettoyage des colonnes vides
-        df = df.dropna(axis=1, how='all')
-
-        # Suppression des espaces et des virgules parasites dans le nom du Grand Prix
-        df["Grand Prix"] = df["Grand Prix"].astype(str).str.strip()
-
-        # Sauvegarde du fichier nettoyé
-        df.to_csv("resultats.csv", index=False, encoding='utf-8')
-
-        print("Fichier resultats.csv nettoyé avec succès !")
-
-    except Exception as e:
-        print(f"Erreur lors du nettoyage du fichier resultats.csv: {e}")
-
-# Exécuter la fonction au démarrage
-nettoyer_resultats_csv()
+import os
 
 app = Flask(__name__)
-
-# Fonction pour lire un fichier CSV et corriger les erreurs d'encodage
-def lire_csv_utf8(fichier):
-    with open(fichier, "r", encoding="utf-8") as f:
-        lignes = f.readlines()  # Lire tout le contenu du fichier ligne par ligne
-    with open(fichier, "w", encoding="utf-8") as f:
-        f.writelines(lignes)  # Réécrire le fichier propre
-    return pd.read_csv(fichier, encoding="utf-8", on_bad_lines='skip')  # Ignore les lignes mal formatées
-
-
-@app.route("/", methods=["GET", "POST"])
-def login():
-     if "nom" in session:
-        return redirect(url_for("accueil"))  # Redirige directement si déjà connecté
-
-     if request.method == "POST":
-        nom = request.form.get("nom")
-        if nom in UTILISATEURS_AUTORISES:
-            session["nom"] = nom
-            return redirect(url_for("accueil"))  # Redirige vers la page principale
-        else:
-            return render_template("login.html", erreur="Nom invalide. Essayez encore.")
-    return render_template("login.html")
-def indes():
-    try:
-        df_classement = pd.read_csv("classement.csv", encoding="utf-8", on_bad_lines="skip")
-
-        if df_classement.empty:
-            classement_dernier_gp = pd.DataFrame()  # Si aucun résultat, retourne un tableau vide
-        else:
-            dernier_gp = df_classement["Grand Prix"].iloc[-1]
-            classement_dernier_gp = df_classement[df_classement["Grand Prix"] == dernier_gp]
-        
-        classement_general_df = pd.read_csv("classement_general.csv")
-        
-        return render_template("index.html", classement_dernier_gp=classement_dernier_gp.to_dict('records'), classement_general=classement_general_df.to_dict('records'))
-
-    except Exception as e:
-        return f"Erreur lors du chargement de l'accueil : {e}"
-        # Récupérer le dernier Grand Prix en fonction de la dernière ligne du fichier
-        dernier_gp = df_classement["Grand Prix"].iloc[-1]
-        classement_du_gp = df_classement[df_classement["Grand Prix"] == dernier_gp]
-
-        df_general = pd.read_csv("classement_general.csv", encoding="utf-8", on_bad_lines="skip")
-
-        return render_template("index.html", classement_du_gp=classement_du_gp.to_dict(orient="records"),
-                               classement_general=df_general.to_dict(orient="records"))
-
-    except Exception as e:
-        return f"Erreur lors du chargement de l'accueil : {e}"
+app.secret_key = "mon_super_secret_key"
 
 from functools import wraps
+from flask import redirect, url_for, session
+
+# Fonction utilitaire pour extraire le dernier GP
+def get_dernier_gp(df):
+    if df.empty:
+        return pd.DataFrame()
+    dernier_gp = df["Grand Prix"].iloc[-1]
+    return df[df["Grand Prix"] == dernier_gp]
 
 def login_requis(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if "nom" not in session:
+        if "utilisateur" not in session:
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated_function
+
+def calculer_classement():
+    if not os.path.exists("classement.csv"):
+        return pd.DataFrame(columns=["Grand Prix", "Participant", "Points GP", "Bonus", "Total"])
+    return pd.read_csv("classement.csv")
+
+@app.route("/", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        utilisateur = request.form.get("utilisateur")
+        if utilisateur in ["Amandine", "Sacha", "Padre"]:
+            session["utilisateur"] = utilisateur
+            return redirect(url_for("index"))
+        else:
+            return render_template("login.html", erreur="Nom invalide")
+    return render_template("login.html")
+
+def index():
+    nom_utilisateur = session.get("utilisateur", "Inconnu")
+    if "utilisateur" not in session:
+        return redirect(url_for("login"))
+
+
+    try:
+        classement_df = pd.read_csv("classement.csv")
+        classement_dernier_gp = get_dernier_gp(classement_df)
+    except Exception as e:
+        classement_dernier_gp = pd.DataFrame()
+
+    try:
+        classement_general_df = pd.read_csv("classement_general.csv")
+    except Exception as e:
+        classement_general_df = pd.DataFrame()
+
+    return render_template(
+        "index.html",
+        classement=classement_dernier_gp.to_dict("records"),
+        classement_general=classement_general_df.to_dict("records"),
+        nom_utilisateur=nom_utilisateur
+    )
+
+@app.route('/login', methods=["GET", "POST"])
+def login2():
+    if request.method == "POST":
+        utilisateur = request.form.get("utilisateur")
+        if utilisateur in ["Amandine", "Sacha", "Padre"]:
+            session["utilisateur"] = utilisateur
+            return redirect(url_for("index"))
+        else:
+            return render_template("login.html", erreur="Nom invalide")
+    return render_template("login.html")
+
+
 @app.route("/accueil")
 @login_requis
-def accueil():
-    nom_utilisateur = session.get("nom", "Inconnu")  # Récupère le nom de session
-    return render_template("accueil.html", nom=nom_utilisateur)
+def index():
+    nom_utilisateur = session.get("utilisateur", "Inconnu")
+
+    # Initialiser les données
+    classement_dernier_gp_dict = []
+    classement_general_dict = []
+
+    try:
+        # Lecture unique du fichier CSV
+        classement_df = pd.read_csv("classement.csv")
+        print("Colonnes du CSV :", classement_df.columns.tolist())
+        print("Aperçu des données :", classement_df.head())
+
+        # Convertir la colonne "Total" en nombre entier
+        classement_df["Total"] = pd.to_numeric(classement_df["Total"], errors='coerce').fillna(0).astype(int)
+        classement_df["Participant"] = classement_df["Participant"].str.strip()
+
+        if not classement_df.empty:
+            # Récupère le dernier Grand Prix
+            dernier_gp = classement_df["Grand Prix"].iloc[-1]
+
+            # Filtrer les lignes correspondant au dernier GP
+            classement_dernier_gp = classement_df[classement_df["Grand Prix"] == dernier_gp]
+            classement_dernier_gp_dict = classement_dernier_gp.to_dict("records")
+
+            # Calculer le classement général
+            classement_general = (
+                classement_df.groupby("Participant")["Total"].sum()
+                .reset_index()
+                .sort_values(by="Total", ascending=False)
+            )
+            print("Classement général calculé :\n", classement_general)
+
+            classement_general_dict = classement_general.to_dict("records")
+    except Exception as e:
+        print("Erreur dans la lecture ou le traitement de classement.csv :", e)
+
+    return render_template("index.html",
+                           classement=classement_dernier_gp_dict,
+                           classement_general=classement_general_dict,
+                           nom_utilisateur=nom_utilisateur, dernier_gp=dernier_gp)
 
 @app.route("/ajouter_pronostic", methods=["GET", "POST"])
 @login_requis
 def ajouter_pronostic():
-    nom_utilisateur = session["nom"]
+    nom_utilisateur = session.get("utilisateur", "Inconnu")
     # Logique pour ajouter un pronostic en vérifiant que l'utilisateur n'en modifie pas un autre
     if request.method == 'POST':
         if 'grand_prix' in request.form and 'participant' in request.form:
