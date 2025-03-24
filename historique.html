@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique des GP</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        table { margin: auto; border-collapse: collapse; width: 90%; }
+        th, td { border: 1px solid black; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        nav a { margin: 10px; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>  Historique des Grands Prix Passés </h1>
+    
+    <nav>
+        <a href="/"> Accueil</a> |
+        <a href="/classement_du_jour"> 🏁 Classement du jour</a> |
+        <a href="/classement_general"> 📈 Classement général</a>
+    </nav>
+
+    <h2> Résultats des Grands Prix</h2>
+    <div class="table-container">
+        <table border="1">
+        <tr>
+            <th>Grand Prix</th>
+            <th>1er</th>
+            <th>2e</th>
+            <th>3e</th>
+            <th>4e</th>
+            <th>5e</th>
+            <th>6e</th>
+            <th>7e</th>
+            <th>8e</th>
+            <th>9e</th>
+            <th>10e</th>
+        </tr>
+        {% for row in resultats %}
+<tr>
+    <td>{{ row["Grand Prix"] }}</td>
+    <td>{{ row["1er"] }}</td>
+    <td>{{ row["2e"] }}</td>
+    <td>{{ row["3e"] }}</td>
+    <td>{{ row["4e"] }}</td>
+    <td>{{ row["5e"] }}</td>
+    <td>{{ row["6e"] }}</td>
+    <td>{{ row["7e"] }}</td>
+    <td>{{ row["8e"] }}</td>
+    <td>{{ row["9e"] }}</td>
+    <td>{{ row["10e"] }}</td>
+</tr>
+{% endfor %}
+    </table>
+
+    <h2> Points Gagnés par les Participants</h2>
+    <table>
+        <tr>
+            <th>Grand Prix</th>
+            <th>Participant</th>
+            <th>Points GP</th>
+            <th>Bonus</th>
+            <th>Total</th>
+        </tr>
+        {% for row in classement %}
+        <tr>
+            <td>{{ row["Grand Prix"] }}</td>
+            <td>{{ row["Participant"] }}</td>
+            <td>{{ row["Points GP"] }}</td>
+            <td>{{ row["Bonus"] }}</td>
+            <td>{{ row["Total"] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</body>
+</html>

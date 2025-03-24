@@ -1,0 +1,29 @@
+/* Appliquer une barre de défilement à la page entière */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto; /* Toujours afficher la barre de défilement verticale */
+}
+
+/* Défilement pour les tableaux */
+.table-container {
+    max-height: 400px; /* Hauteur fixe */
+    overflow-y: auto; /* Ajoute une barre de défilement uniquement si nécessaire */
+    border: 1px solid #ddd; /* Bordure pour une meilleure visibilité */
+    padding: 10px;
+}
+
+/* Style de la barre de défilement pour Chrome, Edge et Safari */
+.table-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background-color: #888; /* Couleur du "bouton" */
+    border-radius: 5px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Couleur au survol */
+}
