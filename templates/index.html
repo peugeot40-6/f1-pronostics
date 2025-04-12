@@ -87,11 +87,12 @@
 
 {% if nom_utilisateur == "Padre" %}
     <p>
-        <a href="{{ url_for('voir_tous_les_pronostics') }}">
-            <button>📋 Voir tous les pronostics</button>
+        <a href="{{ url_for('telecharger_pronostics') }}">
+            <button>📥 Télécharger les pronostics</button>
         </a>
     </p>
 {% endif %}
+
 
 </body>
 </html>
