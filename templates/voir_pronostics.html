@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Pronostics enregistrés</title>
+</head>
+<body>
+    <h2>📋 Pronostics enregistrés</h2>
+    {% if pronostics %}
+        <table border="1">
+            <tr>
+                <th>Grand Prix</th>
+                <th>Participant</th>
+                <th>1er</th>
+                <th>2e</th>
+                <th>3e</th>
+            </tr>
+            {% for p in pronostics %}
+                <tr>
+                    <td>{{ p["Grand Prix"] }}</td>
+                    <td>{{ p["Participant"] }}</td>
+                    <td>{{ p["1er"] }}</td>
+                    <td>{{ p["2e"] }}</td>
+                    <td>{{ p["3e"] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>Aucun pronostic encodé pour l’instant.</p>
+    {% endif %}
+    <p><a href="/accueil">⬅️ Retour à l’accueil</a></p>
+</body>
+</html>
