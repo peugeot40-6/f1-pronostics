@@ -375,25 +375,23 @@ def voir_tous_les_pronostics():
 
 from flask import send_file
 
-@app.route('/telecharger_pronostics')
+@app.route("/telechargements")
 @login_requis
-def telecharger_pronostics():
+def page_telechargements():
     if session.get("utilisateur") != "Padre":
         return redirect(url_for("index"))
+    return render_template("telechargements.html")
 
-    chemin_fichier = "pronostics.csv"
-    return send_file(chemin_fichier, as_attachment=True)
+from flask import send_file
 
 @app.route("/telecharger/<nom_fichier>")
 @login_requis
 def telecharger_fichier(nom_fichier):
-    if session.get("utilisateur") != "Padre":
-        return redirect(url_for("index"))
-
     try:
         return send_file(nom_fichier, as_attachment=True)
     except Exception as e:
         return f"Erreur lors du téléchargement : {e}"
+
 if __name__ == "__main__":
     app.run(debug=True)
 
