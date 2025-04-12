@@ -1,12 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, session, url_for
 import pandas as pd
 import os
 
-app = Flask(__name__)
-app.secret_key = "mon_super_secret_key"
-
 from functools import wraps
-from flask import redirect, url_for, session
+from flask import session, redirect, url_for
+
 
 # Fonction utilitaire pour extraire le dernier GP
 def get_dernier_gp(df):
@@ -28,52 +26,33 @@ def calculer_classement():
         return pd.DataFrame(columns=["Grand Prix", "Participant", "Points GP", "Bonus", "Total"])
     return pd.read_csv("classement.csv")
 
-@app.route("/", methods=["GET", "POST"])
+
+import csv
+
+app = Flask(__name__)
+app.secret_key = "supersecretkey"
+
+participants_mdp = {
+    "Padre": "padre123",
+    "Amandine": "amandine123",
+    "Sacha": "sacha123"
+}
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        utilisateur = request.form.get("utilisateur")
-        if utilisateur in ["Amandine", "Sacha", "Padre"]:
-            session["utilisateur"] = utilisateur
+        nom = request.form["nom"]
+        mdp = request.form["mot_de_passe"]
+        if nom in participants_mdp and participants_mdp[nom] == mdp:
+            session["utilisateur"] = nom
             return redirect(url_for("index"))
         else:
-            return render_template("login.html", erreur="Nom invalide")
+            return render_template("login.html", erreur="Nom ou mot de passe incorrect")
     return render_template("login.html")
 
-def index():
-    nom_utilisateur = session.get("utilisateur", "Inconnu")
-    if "utilisateur" not in session:
-        return redirect(url_for("login"))
-
-
-    try:
-        classement_df = pd.read_csv("classement.csv")
-        classement_dernier_gp = get_dernier_gp(classement_df)
-    except Exception as e:
-        classement_dernier_gp = pd.DataFrame()
-
-    try:
-        classement_general_df = pd.read_csv("classement_general.csv")
-    except Exception as e:
-        classement_general_df = pd.DataFrame()
-
-    return render_template(
-        "index.html",
-        classement=classement_dernier_gp.to_dict("records"),
-        classement_general=classement_general_df.to_dict("records"),
-        nom_utilisateur=nom_utilisateur
-    )
-
-@app.route('/login', methods=["GET", "POST"])
-def login2():
-    if request.method == "POST":
-        utilisateur = request.form.get("utilisateur")
-        if utilisateur in ["Amandine", "Sacha", "Padre"]:
-            session["utilisateur"] = utilisateur
-            return redirect(url_for("index"))
-        else:
-            return render_template("login.html", erreur="Nom invalide")
-    return render_template("login.html")
-
+@app.route("/")
+def redirection_accueil():
+    return redirect(url_for("login"))
 
 @app.route("/accueil")
 @login_requis
@@ -119,32 +98,39 @@ def index():
                            classement_general=classement_general_dict,
                            nom_utilisateur=nom_utilisateur, dernier_gp=dernier_gp)
 
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
 @app.route("/ajouter_pronostic", methods=["GET", "POST"])
 @login_requis
 def ajouter_pronostic():
-    participant = session.get("utilisateur", "Inconnu")
+    if request.method == "POST":
+        gp = request.form["grand_prix"]
+        participant = session.get("utilisateur")  # ✅ On prend l'utilisateur connecté
+        p1 = request.form["pilote1"]
+        p2 = request.form["pilote2"]
+        p3 = request.form["pilote3"]
 
-    if request.method == 'POST':
-        if 'grand_prix' in request.form:
-            gp = request.form['grand_prix']
-            p1 = request.form.get('p1', '')
-            p2 = request.form.get('p2', '')
-            p3 = request.form.get('p3', '')
+        nouvelle_ligne = pd.DataFrame([{
+            "Grand Prix": gp,
+            "Participant": participant,
+            "1er": p1,
+            "2e": p2,
+            "3e": p3
+        }])
 
-            pronostics_df = lire_csv_utf8("pronostics.csv")
-            new_row = pd.DataFrame([{
-                "Grand Prix": gp,
-                "Participant": participant,  # Récupéré via session
-                "1er": p1,
-                "2e": p2,
-                "3e": p3
-            }])
-            pronostics_df = pd.concat([pronostics_df, new_row], ignore_index=True)
-            pronostics_df.to_csv("pronostics.csv", index=False)
+        try:
+            df = pd.read_csv("pronostics.csv")
+            df = pd.concat([df, nouvelle_ligne], ignore_index=True)
+        except FileNotFoundError:
+            df = nouvelle_ligne
 
-            return render_template('confirmation.html', message="Pronostic ajouté avec succès !")
-
-    return render_template('ajouter_pronostic.html', grands_prix=grands_prix, pilotes=pilotes, participant=participant)
+        df.to_csv("pronostics.csv", index=False)
+        return redirect(url_for("index"))
+    
+    return render_template("ajouter_pronostic.html", grands_prix=grands_prix, pilotes=pilotes)
 
 @app.route('/ajouter_resultat', methods=['GET', 'POST'])
 def ajouter_resultat():
