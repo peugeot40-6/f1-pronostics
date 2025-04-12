@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
-<input type="hidden" name="participant" value="{{ nom_utilisateur }}">
-
     <form method="POST" action="{{ url_for('ajouter_pronostic') }}">
         <!-- tes champs ici -->
         <button type="submit">Envoyer</button>
     </form>
 <head>
+<input type="hidden" name="participant" value="{{ nom_utilisateur }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un Pronostic</title>
@@ -25,12 +24,7 @@
                 <option value="{{ gp }}">{{ gp }}</option>
             {% endfor %}
         </select><br>
-        <label>Participant :</label>
-        <select name="participant">
-            {% for p in participants %}
-                <option value="{{ p }}">{{ p }}</option>
-            {% endfor %}
-        </select><br>
+        
         <label>1er :</label>
         <select name="p1">
             {% for pilote in pilotes %}
