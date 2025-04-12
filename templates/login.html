@@ -6,18 +6,15 @@
 </head>
 <body>
     <h2>Bienvenue sur les pronostics F1</h2>
-    {% if message %}
-        <p style="color:red;">{{ message }}</p>
+    {% if erreur %}
+        <p style="color:red;">{{ erreur }}</p>
     {% endif %}
-    <form method="post">
-        <label for="utilisateur">Quel est votre nom ?</label>
-        <select name="utilisateur" id="utilisateur">
-            <option value="">--Choisir--</option>
-            <option value="Amandine">Amandine</option>
-            <option value="Sacha">Sacha</option>
-            <option value="Padre">Padre</option>
-        </select>
-        <button type="submit">Entrer</button>
-    </form>
+    <form method="POST">
+    <label>Nom :</label>
+    <input type="text" name="nom" required><br>
+    <label>Mot de passe :</label>
+    <input type="password" name="mot_de_passe" required><br>
+    <input type="submit" value="Se connecter">
+</form>
 </body>
 </html>

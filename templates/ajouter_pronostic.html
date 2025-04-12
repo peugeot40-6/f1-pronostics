@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -14,29 +13,27 @@
                 <option value="{{ gp }}">{{ gp }}</option>
             {% endfor %}
         </select><br>
+	
+	<select name="pilote1" required>
+          <option value="">-- Choisis le pilote 1 --</option>
+  	  {% for pilote in pilotes %}
+  	  <option value="{{ pilote }}">{{ pilote }}</option>
+  	  {% endfor %}
+	</select>
 
-        <input type="hidden" name="participant" value="{{ participant }}">
+	<select name="pilote2" required>
+          <option value="">-- Choisis le pilote 2 --</option>
+  	  {% for pilote in pilotes %}
+  	  <option value="{{ pilote }}">{{ pilote }}</option>
+  	  {% endfor %}
+	</select>
 
-        <label>1er :</label>
-        <select name="p1">
-            {% for pilote in pilotes %}
-                <option value="{{ pilote }}">{{ pilote }}</option>
-            {% endfor %}
-        </select><br>
-
-        <label>2e :</label>
-        <select name="p2">
-            {% for pilote in pilotes %}
-                <option value="{{ pilote }}">{{ pilote }}</option>
-            {% endfor %}
-        </select><br>
-
-        <label>3e :</label>
-        <select name="p3">
-            {% for pilote in pilotes %}
-                <option value="{{ pilote }}">{{ pilote }}</option>
-            {% endfor %}
-        </select><br>
+	<select name="pilote3" required>
+          <option value="">-- Choisis le pilote 3 --</option>
+  	  {% for pilote in pilotes %}
+  	  <option value="{{ pilote }}">{{ pilote }}</option>
+  	  {% endfor %}
+	</select>
 
         <input type="submit" value="Enregistrer">
     </form>
