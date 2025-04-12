@@ -384,6 +384,16 @@ def telecharger_pronostics():
     chemin_fichier = "pronostics.csv"
     return send_file(chemin_fichier, as_attachment=True)
 
+@app.route("/telecharger/<nom_fichier>")
+@login_requis
+def telecharger_fichier(nom_fichier):
+    if session.get("utilisateur") != "Padre":
+        return redirect(url_for("index"))
+
+    try:
+        return send_file(nom_fichier, as_attachment=True)
+    except Exception as e:
+        return f"Erreur lors du téléchargement : {e}"
 if __name__ == "__main__":
     app.run(debug=True)
 
