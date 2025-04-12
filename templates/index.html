@@ -57,7 +57,13 @@
     <p>Aucun classement disponible pour le dernier Grand Prix.</p>
 {% endif %}
 
-    <h2>📊 Classement Général</h2>
+{% if nom_utilisateur == "Padre" %}
+    <a href="{{ url_for('voir_pronostics') }}">
+        <button style="margin-top: 10px;">📋 Voir les pronostics</button>
+    </a>
+{% endif %}
+
+<h2>📊 Classement Général</h2>
     <table>
         <tr>
             <th>Participant</th>
@@ -70,12 +76,6 @@
         </tr>
         {% endfor %}
     </table>
-
-{% if nom_utilisateur == "Padre" %}
-    <a href="{{ url_for('voir_pronostics') }}">
-        <button style="margin-top: 10px;">📋 Voir les pronostics</button>
-    </a>
-{% endif %}
 
 <h3>🏁 Classement pour le Grand Prix de {{ dernier_gp }}</h3>
 
