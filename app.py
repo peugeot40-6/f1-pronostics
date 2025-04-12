@@ -373,6 +373,17 @@ def voir_tous_les_pronostics():
     pronostics_df = pronostics_df.sort_values(by=["Grand Prix", "Participant"])
     return render_template("tous_les_pronostics.html", pronostics=pronostics_df.to_dict("records"))
 
+from flask import send_file
+
+@app.route('/telecharger_pronostics')
+@login_requis
+def telecharger_pronostics():
+    if session.get("utilisateur") != "Padre":
+        return redirect(url_for("index"))
+
+    chemin_fichier = "pronostics.csv"
+    return send_file(chemin_fichier, as_attachment=True)
+
 if __name__ == "__main__":
     app.run(debug=True)
 
