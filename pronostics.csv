@@ -1,10 +1,10 @@
-Grand Prix,Participant,1er,2e,3e
-Australie,Amandine,Max Verstappen,Lando Norris,George Russell
-Australie,Sacha,Lando Norris,Max Verstappen,Oscar Piastri
-Australie,Padre,Max Verstappen,Lando Norris,Lewis Hamilton
-Chine,Amandine,Max Verstappen,Lando Norris,Lewis Hamilton
-Chine,Sacha,Lando Norris,Max Verstappen,Lewis Hamilton
-Chine,Padre,Oscar Piastri,Max Verstappen,Lewis Hamilton
-Japon,Padre,Oscar Piastri,Max Verstappen,Lando Norris
-Japon,Sacha,Lando Norris,Max Verstappen,Charles Leclerc
-Japon,Amandine,Max Verstappen,Lando Norris,George Russell
+Grand Prix,Participant,1er,2e,3e,Participants
+Australie,Amandine,Max Verstappen,Lando Norris,George Russell,
+Australie,Sacha,Lando Norris,Max Verstappen,Oscar Piastri,
+Australie,Padre,Max Verstappen,Lando Norris,Lewis Hamilton,
+Chine,Amandine,Max Verstappen,Lando Norris,Lewis Hamilton,
+Chine,Sacha,Lando Norris,Max Verstappen,Lewis Hamilton,
+Chine,Padre,Oscar Piastri,Max Verstappen,Lewis Hamilton,
+Japon,Padre,Oscar Piastri,Max Verstappen,Lando Norris,
+Japon,Sacha,Lando Norris,Max Verstappen,Charles Leclerc,
+Japon,Amandine,Max Verstappen,Lando Norris,George Russell,
