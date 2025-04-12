@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
+<input type="hidden" name="participant" value="{{ nom_utilisateur }}">
+
     <form method="POST" action="{{ url_for('ajouter_pronostic') }}">
         <!-- tes champs ici -->
         <button type="submit">Envoyer</button>
