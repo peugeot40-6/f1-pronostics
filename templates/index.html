@@ -73,7 +73,6 @@
         {% endfor %}
     </table>
 
-<h3>🏁 Classement pour le Grand Prix de {{ dernier_gp }}</h3>
 
 {% if nom_utilisateur == "Padre" %}
     	<a href="{{ url_for('voir_pronostics') }}">
@@ -87,18 +86,10 @@
 
 {% if nom_utilisateur == "Padre" %}
     <p>
-        <a href="{{ url_for('telecharger_pronostics') }}">
-            <button>📥 Télécharger les pronostics</button>
+        <a href="{{ url_for('page_telechargements') }}">
+            <button>📥 Télécharger les données GP</button>
         </a>
     </p>
-{% endif %}
-
-{% if nom_utilisateur == "Padre" %}
-    <h3>📥 Télécharger les données</h3>
-    <p><a href="{{ url_for('telecharger_fichier', nom_fichier='pronostics.csv') }}"><button>📋 Pronostics</button></a></p>
-    <p><a href="{{ url_for('telecharger_fichier', nom_fichier='resultats.csv') }}"><button>🏁 Résultats</button></a></p>
-    <p><a href="{{ url_for('telecharger_fichier', nom_fichier='classement.csv') }}"><button>📊 Classement du GP</button></a></p>
-    <p><a href="{{ url_for('telecharger_fichier', nom_fichier='classement_general.csv') }}"><button>🏆 Classement Général</button></a></p>
 {% endif %}
 
 </body>
