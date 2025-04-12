@@ -8,8 +8,6 @@
 <body>
     <nav>
         <a href="/">Accueil</a> |
-        <a href="/ajouter_pronostic">Ajouter un pronostic</a> |
-        <a href="/ajouter_resultat">Ajouter un résultat</a> |
         <a href="/classement">Voir le classement</a>
     </nav>
     
@@ -43,8 +41,8 @@
         </tr>
         {% for row in classement_general %}
         <tr>
-            <td>{{ row["Participant"] }}</td>
-            <td>{{ row["Total Points"] }}</td>
+            <td>{{ ligne["Participant"] }}</td>
+            <td>{{ ligne["Total Points"] }}</td>
         </tr>
         {% endfor %}
     </table>

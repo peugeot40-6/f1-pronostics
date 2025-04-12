@@ -25,15 +25,15 @@
 </head>
 <body>
 
-    <h1>🏎️ Pronostics F1 - Saison 2025 🏆</h1>
+<h1>🏎️ Pronostics F1 - Saison 2025 🏆</h1>
 
     <nav>
         <a href="/ajouter_pronostic">➕ Ajouter un pronostic</a> |
-        <a href="/ajouter_resultat">📊 Ajouter un résultat</a> |
         <a href="/classement_du_jour">🏁 Classement du jour</a> |
         <a href="/classement_general">📈 Classement général</a>
         <a href="/historique"> historique</a>
     </nav>
+
 
 <h2>🏁 Classement du dernier Grand Prix</h2>
 {% if classement %}
@@ -73,12 +73,19 @@
         {% endfor %}
     </table>
 
-{% if nom_utilisateur == "Padre" %}
-    <a href="{{ url_for('voir_pronostics') }}">
-        <button style="margin-top: 10px;">📋 Voir les pronostics</button>
-    </a>
-{% endif %}
 <h3>🏁 Classement pour le Grand Prix de {{ dernier_gp }}</h3>
+
+{% if nom_utilisateur == "Padre" %}
+    	<a href="{{ url_for('voir_pronostics') }}">
+        	<button style="margin-top: 10px;">📋 Voir les pronostics</button>
+	</a>
+
+	<a href="{{ url_for('ajouter_resultat') }}">
+		<button style="margin: 30px;"> 📊  Ajouter un résultat
+	</a>
+{% endif %}
+
+
 
 </body>
 </html>

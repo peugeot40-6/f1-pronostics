@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>🏁 Classement du jour</title>
+</head>
+<body>
+    <h1>🏁 Classement du dernier Grand Prix</h1>
+
+    {% if records %}
+    <table border="1">
+        <tr>
+            <th>Grand Prix</th>
+            <th>Participant</th>
+            <th>Points GP</th>
+            <th>Bonus</th>
+            <th>Total</th>
+        </tr>
+        {% for ligne in records %}
+        <tr>
+            <td>{{ ligne["Grand Prix"] }}</td>
+            <td>{{ ligne["Participant"] }}</td>
+            <td>{{ ligne["Points GP"] }}</td>
+            <td>{{ ligne["Bonus"] }}</td>
+            <td>{{ ligne["Total"] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>Aucun classement trouvé pour le dernier Grand Prix.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('index') }}">🏠 Retour à l'accueil</a></p>
+</body>
+</html>

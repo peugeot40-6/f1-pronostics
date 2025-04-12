@@ -18,7 +18,7 @@
             {% for p in pronostics %}
                 <tr>
                     <td>{{ p["Grand Prix"] }}</td>
-                    <td>{{ p["Participant"] }}</td>
+                    <td>{{ p["Participant"] if p["Participant"] else "?" }}</td>
                     <td>{{ p["1er"] }}</td>
                     <td>{{ p["2e"] }}</td>
                     <td>{{ p["3e"] }}</td>
