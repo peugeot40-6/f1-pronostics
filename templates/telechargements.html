@@ -1,0 +1,20 @@
+<!-- templates/telechargements.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Téléchargements GP</title>
+</head>
+<body>
+    <h2>📥 Télécharger les données après chaque Grand Prix</h2>
+
+    <ul>
+        <li><a href="{{ url_for('telecharger_fichier', nom_fichier='pronostics.csv') }}"><button>📋 Pronostics</button></a></li>
+        <li><a href="{{ url_for('telecharger_fichier', nom_fichier='resultats.csv') }}"><button>🏁 Résultats</button></a></li>
+        <li><a href="{{ url_for('telecharger_fichier', nom_fichier='classement.csv') }}"><button>📊 Classement du GP</button></a></li>
+        <li><a href="{{ url_for('telecharger_fichier', nom_fichier='classement_general.csv') }}"><button>🏆 Classement Général</button></a></li>
+    </ul>
+
+    <p><a href="{{ url_for('index') }}">⬅️ Retour à l'accueil</a></p>
+</body>
+</html>
