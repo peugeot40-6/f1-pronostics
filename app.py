@@ -122,24 +122,29 @@ def index():
 @app.route("/ajouter_pronostic", methods=["GET", "POST"])
 @login_requis
 def ajouter_pronostic():
-    nom_utilisateur = session.get("utilisateur", "Inconnu")
-    # Logique pour ajouter un pronostic en vérifiant que l'utilisateur n'en modifie pas un autre
+    participant = session.get("utilisateur", "Inconnu")
+
     if request.method == 'POST':
-        if 'grand_prix' in request.form and 'participant' in request.form:
+        if 'grand_prix' in request.form:
             gp = request.form['grand_prix']
-            participant = request.form['participant']
             p1 = request.form.get('p1', '')
             p2 = request.form.get('p2', '')
             p3 = request.form.get('p3', '')
 
             pronostics_df = lire_csv_utf8("pronostics.csv")
-            new_row = pd.DataFrame([{"Grand Prix": gp, "Participant": participant, "1er": p1, "2e": p2, "3e": p3}])
+            new_row = pd.DataFrame([{
+                "Grand Prix": gp,
+                "Participant": participant,  # Récupéré via session
+                "1er": p1,
+                "2e": p2,
+                "3e": p3
+            }])
             pronostics_df = pd.concat([pronostics_df, new_row], ignore_index=True)
             pronostics_df.to_csv("pronostics.csv", index=False)
 
             return render_template('confirmation.html', message="Pronostic ajouté avec succès !")
 
-    return render_template('ajouter_pronostic.html', grands_prix=grands_prix, participants=participants, pilotes=pilotes)
+    return render_template('ajouter_pronostic.html', grands_prix=grands_prix, pilotes=pilotes, participant=participant)
 
 @app.route('/ajouter_resultat', methods=['GET', 'POST'])
 def ajouter_resultat():
@@ -259,12 +264,22 @@ def calculer_classement():
 
 
 @app.route('/classement_du_jour')
+@login_requis
 def classement_du_jour():
-    # Recalculer le classement avant l'affichage
-    calculer_classement()
-    classement_df = pd.read_csv("classement.csv")
-    return render_template('classement.html', classement=classement_df.to_dict('records'))
-    
+    try:
+        df = pd.read_csv("classement.csv")
+        if not df.empty:
+            dernier_gp = df["Grand Prix"].iloc[-1]
+            df = df[df["Grand Prix"] == dernier_gp]
+            records = df.to_dict(orient="records")
+        else:
+            records = []
+    except Exception as e:
+        print("Erreur lors de la lecture du classement :", e)
+        records = []
+
+    return render_template("classement_du_jour.html", records=records)
+
 @app.route('/classement_general')
 def classement_general():
     # Recalculer le classement avant l'affichage
@@ -327,27 +342,37 @@ def voir_pronostics():
 
     return render_template("voir_pronostics.html", pronostics=pronostics)
 
-@app.route('/historique')
+@app.route("/historique")
 def historique():
     try:
-        # Lire les fichiers CSV contenant les résultats et le classement
-        df_resultats = pd.read_csv("resultats.csv", encoding="utf-8", on_bad_lines="skip")
-        resultats_df = lire_csv_utf8("resultats.csv")
-        classement_df = lire_csv_utf8("classement.csv")
+        df = pd.read_csv("classement.csv")
 
-        # Vérifier que les fichiers ne sont pas vides
-        if resultats_df.empty or classement_df.empty:
-            return "Aucun historique disponible pour le moment."
+        historique_par_gp = []
+        couleurs = ["#f8d7da", "#d4edda", "#d1ecf1", "#fff3cd", "#f0dfff"]
 
-        # Convertir les données en dictionnaire pour l'affichage
-        resultats_data = resultats_df.to_dict('records')
-        classement_data = classement_df.to_dict('records')
+        for i, gp in enumerate(df["Grand Prix"].unique()):
+            lignes = df[df["Grand Prix"] == gp].to_dict(orient="records")
+            historique_par_gp.append({
+                "nom": gp,
+                "couleur": couleurs[i % len(couleurs)],
+                "lignes": lignes
+            })
 
-        return render_template('historique.html', resultats=resultats_data, classement=classement_data)
+        return render_template("historique.html", historique_par_gp=historique_par_gp)
 
     except Exception as e:
         return f"Erreur lors de la récupération de l'historique : {e}"
 
+@app.route("/tous_les_pronostics")
+@login_requis
+def voir_tous_les_pronostics():
+    if session.get("utilisateur") != "Padre":
+        return redirect(url_for("index"))
 
-if __name__ == '__main__':
+    pronostics_df = pd.read_csv("pronostics.csv")
+    pronostics_df = pronostics_df.sort_values(by=["Grand Prix", "Participant"])
+    return render_template("tous_les_pronostics.html", pronostics=pronostics_df.to_dict("records"))
+
+if __name__ == "__main__":
     app.run(debug=True)
+
