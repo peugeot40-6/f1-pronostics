@@ -315,6 +315,18 @@ def nettoyer_resultats_csv():
 # 🔹 Appel du nettoyage avant lancement de Flask
 nettoyer_resultats_csv()
 
+@app.route("/voir_pronostics")
+@login_requis
+def voir_pronostics():
+    try:
+        df = pd.read_csv("pronostics.csv")
+        pronostics = df.to_dict(orient="records")
+    except Exception as e:
+        print("Erreur lecture pronostics.csv :", e)
+        pronostics = []
+
+    return render_template("voir_pronostics.html", pronostics=pronostics)
+
 @app.route('/historique')
 def historique():
     try:
