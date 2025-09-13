@@ -164,8 +164,8 @@ grands_prix = [
 pilotes = [
     "Max Verstappen", "Lewis Hamilton", "Charles Leclerc", "Kimi Antonelli", "George Russell",
     "Carlos Sainz", "Lando Norris", "Oscar Piastri", "Fernando Alonso", "Esteban Ocon",
-    "Pierre Gasly", "Lance Stroll", "Kevin Magnussen", "Nico Hulkenberg", "Oliver Bearman",
-    "Jack Doohan", "Yuki Tsunoda", "Liam Lawson", "Alexander Albon", "Isack Hadjar"
+    "Pierre Gasly", "Lance Stroll", "Gabriel Bortoleto", "Nico Hulkenberg", "Oliver Bearman",
+    "Franco Colapinto", "Yuki Tsunoda", "Liam Lawson", "Alexander Albon", "Isack Hadjar"
 ]
 
 # Points attribués par position
