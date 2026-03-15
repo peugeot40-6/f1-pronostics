@@ -59,6 +59,7 @@ def logout():
 def index():
     try:
         nom_utilisateur = session.get("utilisateur", "Inconnu")
+
         classement_dernier_gp_dict = []
         classement_general_dict = []
         dernier_gp = None
@@ -72,9 +73,7 @@ def index():
                 ).fillna(0).astype(int)
 
             if "Participant" in classement_df.columns:
-                classement_df["Participant"] = (
-                    classement_df["Participant"].astype(str).str.strip()
-                )
+                classement_df["Participant"] = classement_df["Participant"].astype(str).str.strip()
 
             if not classement_df.empty and "Grand Prix" in classement_df.columns:
                 dernier_gp = classement_df["Grand Prix"].iloc[-1]
@@ -102,8 +101,8 @@ def index():
 
     except Exception as e:
         import traceback
-        return f"<pre>{traceback.format_exc()}</pre>", 5
-
+        return f"<pre>{traceback.format_exc()}</pre>", 500
+        
 # ================================
 # 📥 AJOUT PRONOSTIC
 # ================================
