@@ -238,7 +238,62 @@ def classement_du_jour():
         records = []
 
     return render_template("classement_du_jour.html", records=records)
-    
+
+@app.route('/classement_general')
+@login_requis
+def classement_general():
+    try:
+        if os.path.exists("classement.csv"):
+            df = pd.read_csv("classement.csv")
+
+            if not df.empty and "Participant" in df.columns and "Total" in df.columns:
+                df["Total"] = pd.to_numeric(df["Total"], errors="coerce").fillna(0)
+                classement_general_df = (
+                    df.groupby("Participant")["Total"]
+                    .sum()
+                    .reset_index()
+                    .sort_values(by="Total", ascending=False)
+                )
+                records = classement_general_df.to_dict("records")
+            else:
+                records = []
+        else:
+            records = []
+
+    except Exception as e:
+        print("Erreur classement_general :", e)
+        records = []
+
+    return render_template("classement_general.html", classement_general=records)
+
+@app.route("/historique")
+@login_requis
+def historique():
+    try:
+        if os.path.exists("classement.csv"):
+            df = pd.read_csv("classement.csv")
+        else:
+            df = pd.DataFrame()
+
+        historique_par_gp = []
+        couleurs = ["#f8d7da", "#d4edda", "#d1ecf1", "#fff3cd", "#f0dfff"]
+
+        if not df.empty and "Grand Prix" in df.columns:
+            for i, gp in enumerate(df["Grand Prix"].dropna().unique()):
+                lignes = df[df["Grand Prix"] == gp].to_dict(orient="records")
+                historique_par_gp.append({
+                    "nom": gp,
+                    "couleur": couleurs[i % len(couleurs)],
+                    "lignes": lignes
+                })
+
+    except Exception as e:
+        print("Erreur historique :", e)
+        historique_par_gp = []
+
+    return render_template("historique.html", historique_par_gp=historique_par_gp)
+
+
 # ================================
 # 📥 TÉLÉCHARGEMENTS
 # ================================
