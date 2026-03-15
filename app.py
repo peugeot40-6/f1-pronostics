@@ -213,6 +213,10 @@ def ajouter_resultat():
 
     return render_template('ajouter_resultat.html', grands_prix=grands_prix, pilotes=pilotes)
 
+        
+# ================================
+# 📂 VOIR CLASSEMENT DU JOUR
+# ================================
 @app.route('/classement_du_jour')
 @login_requis
 def classement_du_jour():
