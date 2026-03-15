@@ -320,15 +320,14 @@ def ajouter_resultat():
         gp = request.form.get('grand_prix', '').strip()
         resultats = [request.form.get(f'pos{i}', '').strip() for i in range(1, 11)]
 
-        try:
-            resultats_df = lire_csv_utf8("resultats.csv")
-        except Exception:
+        resultats_df = lire_csv_utf8("resultats.csv")
+
+        if resultats_df.empty:
             resultats_df = pd.DataFrame(columns=["Grand Prix"] + [f"pos{i}" for i in range(1, 11)])
 
-        # Supprime un éventuel ancien résultat pour ce GP avant d'ajouter le nouveau
-        if not resultats_df.empty and "Grand Prix" in resultats_df.columns:
+        if "Grand Prix" in resultats_df.columns:
             resultats_df["Grand Prix"] = resultats_df["Grand Prix"].astype(str).str.strip()
-            resultats_df = resultats_df[resultats_df["Grand Prix"] != gp]
+            resultats_df = resultats_df[resultats_df["Grand Prix"].str.lower() != gp.lower()]
 
         new_row = pd.DataFrame([{
             "Grand Prix": gp,
@@ -338,12 +337,12 @@ def ajouter_resultat():
         resultats_df = pd.concat([resultats_df, new_row], ignore_index=True)
         resultats_df.to_csv("resultats.csv", index=False, encoding='utf-8')
 
-        # Recalcul automatique du classement
         recalculer_classement()
 
-        return redirect(url_for("index"))
+        return redirect(url_for("classement_general"))
 
-    return render_template('ajouter_resultat.html', grands_prix=grands_prix, pilotes=pilotes)        
+    return render_template('ajouter_resultat.html', grands_prix=grands_prix, pilotes=pilotes)
+    
 # ================================
 # 📂 VOIR CLASSEMENT DU JOUR
 # ================================
