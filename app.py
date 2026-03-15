@@ -21,16 +21,15 @@ def login_requis(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def calculer_classement():
+def lire_classement():
     if not os.path.exists("classement.csv"):
         return pd.DataFrame(columns=["Grand Prix", "Participant", "Points GP", "Bonus", "Total"])
     return pd.read_csv("classement.csv")
 
-
 import csv
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"
+app.secret_key = os.environ.get("SECRET_KEY", "supersecretkey")
 
 participants_mdp = {
     "Padre": "padre123",
@@ -41,8 +40,9 @@ participants_mdp = {
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        nom = request.form["nom"]
-        mdp = request.form["mot_de_passe"]
+        nom = request.form.get("nom", "").strip()
+        mdp = request.form.get("mot_de_passe", "").strip()
+
         if nom in participants_mdp and participants_mdp[nom] == mdp:
             session["utilisateur"] = nom
             return redirect(url_for("index"))
