@@ -123,6 +123,113 @@ pilotes = [
     "Isack Hadjar", "Valteri Bottas", "Sergio Perez", "Arvid Lindblad",
 ]
 
+def lire_csv_utf8(filename):
+    try:
+        df = pd.read_csv(filename, encoding="utf-8")
+    except FileNotFoundError:
+        df = pd.DataFrame()
+    except UnicodeDecodeError:
+        df = pd.read_csv(filename, encoding="ISO-8859-1")
+
+    df.fillna("", inplace=True)
+    return df
+
+
+def recalculer_classement():
+    pronostics_df = lire_csv_utf8("pronostics.csv")
+    resultats_df = lire_csv_utf8("resultats.csv")
+
+    colonnes_classement = ["Grand Prix", "Participant", "Points GP", "Bonus", "Total"]
+
+    if pronostics_df.empty or resultats_df.empty:
+        pd.DataFrame(columns=colonnes_classement).to_csv("classement.csv", index=False)
+        return
+
+    classement_lignes = []
+
+    points_f1 = {
+        1: 25, 2: 18, 3: 15, 4: 12, 5: 10,
+        6: 8, 7: 6, 8: 4, 9: 2, 10: 1
+    }
+
+    # Nettoyage des colonnes Grand Prix
+    if "Grand Prix" in pronostics_df.columns:
+        pronostics_df["Grand Prix"] = pronostics_df["Grand Prix"].astype(str).str.strip()
+
+    if "Grand Prix" in resultats_df.columns:
+        resultats_df["Grand Prix"] = resultats_df["Grand Prix"].astype(str).str.strip()
+
+    for _, row in pronostics_df.iterrows():
+        gp = str(row.get("Grand Prix", "")).strip()
+        participant = str(row.get("Participant", "")).strip()
+
+        pronos = [
+            str(row.get("1er", "")).strip(),
+            str(row.get("2e", "")).strip(),
+            str(row.get("3e", "")).strip()
+        ]
+
+        if not gp or not participant:
+            continue
+
+        resultat_gp = resultats_df[resultats_df["Grand Prix"] == gp]
+        if resultat_gp.empty:
+            continue
+
+        ligne_resultat = resultat_gp.iloc[0]
+
+        # Résultats attendus dans les colonnes pos1 à pos10
+        resultats = [
+            str(ligne_resultat.get(f"pos{i}", "")).strip()
+            for i in range(1, 11)
+        ]
+        resultats = [r for r in resultats if r]
+
+        if not resultats:
+            continue
+
+        # Points selon la place réelle du pilote
+        points = 0
+        for pilote in pronos:
+            if pilote in resultats:
+                position_reelle = resultats.index(pilote) + 1
+                points += points_f1.get(position_reelle, 0)
+
+        # Bonus
+        podium_reel = resultats[:3]
+        if pronos == podium_reel:
+            bonus = 10
+        elif set(pronos) == set(podium_reel):
+            bonus = 3
+        else:
+            bonus = 0
+
+        total_points = points + bonus
+
+        classement_lignes.append({
+            "Grand Prix": gp,
+            "Participant": participant,
+            "Points GP": points,
+            "Bonus": bonus,
+            "Total": total_points
+        })
+
+    classement_df = pd.DataFrame(classement_lignes, columns=colonnes_classement)
+    classement_df.to_csv("classement.csv", index=False)
+
+    if not classement_df.empty:
+        classement_general_df = (
+            classement_df.groupby("Participant")["Total"]
+            .sum()
+            .reset_index()
+            .sort_values(by="Total", ascending=False)
+        )
+    else:
+        classement_general_df = pd.DataFrame(columns=["Participant", "Total"])
+
+    classement_general_df.to_csv("classement_general.csv", index=False)
+    
+
 @app.route("/ajouter_pronostic", methods=["GET", "POST"])
 @login_requis
 def ajouter_pronostic():
@@ -185,7 +292,6 @@ def voir_tous_les_pronostics():
 # 📥 AJOUT RESULTATS
 # ================================
 
-
 @app.route('/ajouter_resultat', methods=['GET', 'POST'])
 @login_requis
 def ajouter_resultat():
@@ -193,13 +299,18 @@ def ajouter_resultat():
         return redirect(url_for("index"))
 
     if request.method == 'POST':
-        gp = request.form.get('grand_prix')
-        resultats = [request.form.get(f'pos{i}', '') for i in range(1, 11)]
+        gp = request.form.get('grand_prix', '').strip()
+        resultats = [request.form.get(f'pos{i}', '').strip() for i in range(1, 11)]
 
         try:
             resultats_df = lire_csv_utf8("resultats.csv")
-        except:
+        except Exception:
             resultats_df = pd.DataFrame(columns=["Grand Prix"] + [f"pos{i}" for i in range(1, 11)])
+
+        # Supprime un éventuel ancien résultat pour ce GP avant d'ajouter le nouveau
+        if not resultats_df.empty and "Grand Prix" in resultats_df.columns:
+            resultats_df["Grand Prix"] = resultats_df["Grand Prix"].astype(str).str.strip()
+            resultats_df = resultats_df[resultats_df["Grand Prix"] != gp]
 
         new_row = pd.DataFrame([{
             "Grand Prix": gp,
@@ -209,11 +320,12 @@ def ajouter_resultat():
         resultats_df = pd.concat([resultats_df, new_row], ignore_index=True)
         resultats_df.to_csv("resultats.csv", index=False, encoding='utf-8')
 
+        # Recalcul automatique du classement
+        recalculer_classement()
+
         return redirect(url_for("index"))
 
-    return render_template('ajouter_resultat.html', grands_prix=grands_prix, pilotes=pilotes)
-
-        
+    return render_template('ajouter_resultat.html', grands_prix=grands_prix, pilotes=pilotes)        
 # ================================
 # 📂 VOIR CLASSEMENT DU JOUR
 # ================================
@@ -318,6 +430,16 @@ def telecharger_fichier(nom_fichier):
 # ================================
 # 🚀 LANCEMENT
 # ================================
+if not os.path.exists("pronostics.csv"):
+    pd.DataFrame(columns=["Grand Prix", "Participant", "1er", "2e", "3e"]).to_csv("pronostics.csv", index=False)
 
+if not os.path.exists("resultats.csv"):
+    pd.DataFrame(columns=["Grand Prix"] + [f"pos{i}" for i in range(1, 11)]).to_csv("resultats.csv", index=False)
+
+if not os.path.exists("classement.csv"):
+    pd.DataFrame(columns=["Grand Prix", "Participant", "Points GP", "Bonus", "Total"]).to_csv("classement.csv", index=False)
+
+if not os.path.exists("classement_general.csv"):
+    pd.DataFrame(columns=["Participant", "Total"]).to_csv("classement_general.csv", index=False)
 if __name__ == "__main__":
     app.run(debug=True)
