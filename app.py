@@ -1,6 +1,3 @@
-@app.route("/test_version")
-def test_version():
-    return "VERSION OK 15-03"
 from flask import Flask, render_template, request, redirect, session, url_for, send_file
 import pandas as pd
 import os
@@ -9,6 +6,9 @@ from functools import wraps
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "supersecretkey")
 
+@app.route("/test_version")
+def test_version():
+    return "VERSION OK 15-03"
 # ================================
 # 🔐 AUTHENTIFICATION
 # ================================
