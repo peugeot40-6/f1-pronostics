@@ -59,45 +59,48 @@ def redirection_accueil():
 def index():
     nom_utilisateur = session.get("utilisateur", "Inconnu")
 
-    # Initialiser les données
     classement_dernier_gp_dict = []
     classement_general_dict = []
+    dernier_gp = None
 
     try:
-        # Lecture unique du fichier CSV
         classement_df = pd.read_csv("classement.csv")
         print("Colonnes du CSV :", classement_df.columns.tolist())
         print("Aperçu des données :", classement_df.head())
 
-        # Convertir la colonne "Total" en nombre entier
-        classement_df["Total"] = pd.to_numeric(classement_df["Total"], errors='coerce').fillna(0).astype(int)
-        classement_df["Participant"] = classement_df["Participant"].str.strip()
+        if "Total" in classement_df.columns:
+            classement_df["Total"] = pd.to_numeric(
+                classement_df["Total"], errors="coerce"
+            ).fillna(0).astype(int)
 
-        if not classement_df.empty:
-            # Récupère le dernier Grand Prix
+        if "Participant" in classement_df.columns:
+            classement_df["Participant"] = classement_df["Participant"].astype(str).str.strip()
+
+        if not classement_df.empty and "Grand Prix" in classement_df.columns:
             dernier_gp = classement_df["Grand Prix"].iloc[-1]
 
-            # Filtrer les lignes correspondant au dernier GP
             classement_dernier_gp = classement_df[classement_df["Grand Prix"] == dernier_gp]
             classement_dernier_gp_dict = classement_dernier_gp.to_dict("records")
 
-            # Calculer le classement général
-            classement_general = (
-                classement_df.groupby("Participant")["Total"].sum()
-                .reset_index()
-                .sort_values(by="Total", ascending=False)
-            )
-            print("Classement général calculé :\n", classement_general)
+            if "Participant" in classement_df.columns and "Total" in classement_df.columns:
+                classement_general = (
+                    classement_df.groupby("Participant")["Total"]
+                    .sum()
+                    .reset_index()
+                    .sort_values(by="Total", ascending=False)
+                )
+                classement_general_dict = classement_general.to_dict("records")
 
-            classement_general_dict = classement_general.to_dict("records")
     except Exception as e:
         print("Erreur dans la lecture ou le traitement de classement.csv :", e)
 
-    return render_template("index.html",
-                           classement=classement_dernier_gp_dict,
-                           classement_general=classement_general_dict,
-                           nom_utilisateur=nom_utilisateur, dernier_gp=dernier_gp)
-
+    return render_template(
+        "index.html",
+        classement=classement_dernier_gp_dict,
+        classement_general=classement_general_dict,
+        nom_utilisateur=nom_utilisateur,
+        dernier_gp=dernier_gp
+    )
 @app.route("/logout")
 def logout():
     session.clear()
