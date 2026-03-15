@@ -213,7 +213,28 @@ def ajouter_resultat():
 
     return render_template('ajouter_resultat.html', grands_prix=grands_prix, pilotes=pilotes)
 
+@app.route('/classement_du_jour')
+@login_requis
+def classement_du_jour():
+    try:
+        if os.path.exists("classement.csv"):
+            df = pd.read_csv("classement.csv")
 
+            if not df.empty and "Grand Prix" in df.columns:
+                dernier_gp = df["Grand Prix"].iloc[-1]
+                df = df[df["Grand Prix"] == dernier_gp]
+                records = df.to_dict(orient="records")
+            else:
+                records = []
+        else:
+            records = []
+
+    except Exception as e:
+        print("Erreur classement_du_jour :", e)
+        records = []
+
+    return render_template("classement_du_jour.html", records=records)
+    
 # ================================
 # 📥 TÉLÉCHARGEMENTS
 # ================================
