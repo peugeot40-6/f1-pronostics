@@ -57,13 +57,12 @@ def logout():
 @app.route("/accueil")
 @login_requis
 def index():
-    nom_utilisateur = session.get("utilisateur", "Inconnu")
-
-    classement_dernier_gp_dict = []
-    classement_general_dict = []
-    dernier_gp = None
-
     try:
+        nom_utilisateur = session.get("utilisateur", "Inconnu")
+        classement_dernier_gp_dict = []
+        classement_general_dict = []
+        dernier_gp = None
+
         if os.path.exists("classement.csv"):
             classement_df = pd.read_csv("classement.csv")
 
@@ -73,7 +72,9 @@ def index():
                 ).fillna(0).astype(int)
 
             if "Participant" in classement_df.columns:
-                classement_df["Participant"] = classement_df["Participant"].astype(str).str.strip()
+                classement_df["Participant"] = (
+                    classement_df["Participant"].astype(str).str.strip()
+                )
 
             if not classement_df.empty and "Grand Prix" in classement_df.columns:
                 dernier_gp = classement_df["Grand Prix"].iloc[-1]
@@ -91,16 +92,17 @@ def index():
                 )
                 classement_general_dict = classement_general.to_dict("records")
 
-    except Exception as e:
-        print("Erreur classement :", e)
+        return render_template(
+            "index.html",
+            classement=classement_dernier_gp_dict,
+            classement_general=classement_general_dict,
+            nom_utilisateur=nom_utilisateur,
+            dernier_gp=dernier_gp
+        )
 
-    return render_template(
-        "index.html",
-        classement=classement_dernier_gp_dict,
-        classement_general=classement_general_dict,
-        nom_utilisateur=nom_utilisateur,
-        dernier_gp=dernier_gp
-    )
+    except Exception as e:
+        import traceback
+        return f"<pre>{traceback.format_exc()}</pre>", 5
 
 # ================================
 # 📥 AJOUT PRONOSTIC
