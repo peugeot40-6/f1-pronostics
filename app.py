@@ -180,6 +180,39 @@ def voir_tous_les_pronostics():
     pronostics_df = pd.read_csv("pronostics.csv")
     pronostics_df = pronostics_df.sort_values(by=["Grand Prix", "Participant"])
     return render_template("tous_les_pronostics.html", pronostics=pronostics_df.to_dict("records"))
+        
+# ================================
+# 📥 AJOUT RESULTATS
+# ================================
+
+
+@app.route('/ajouter_resultat', methods=['GET', 'POST'])
+@login_requis
+def ajouter_resultat():
+    if session.get("utilisateur") != "Padre":
+        return redirect(url_for("index"))
+
+    if request.method == 'POST':
+        gp = request.form.get('grand_prix')
+        resultats = [request.form.get(f'pos{i}', '') for i in range(1, 11)]
+
+        try:
+            resultats_df = lire_csv_utf8("resultats.csv")
+        except:
+            resultats_df = pd.DataFrame(columns=["Grand Prix"] + [f"pos{i}" for i in range(1, 11)])
+
+        new_row = pd.DataFrame([{
+            "Grand Prix": gp,
+            **{f"pos{i}": resultats[i-1] for i in range(1, 11)}
+        }])
+
+        resultats_df = pd.concat([resultats_df, new_row], ignore_index=True)
+        resultats_df.to_csv("resultats.csv", index=False, encoding='utf-8')
+
+        return redirect(url_for("index"))
+
+    return render_template('ajouter_resultat.html', grands_prix=grands_prix, pilotes=pilotes)
+
 
 # ================================
 # 📥 TÉLÉCHARGEMENTS
