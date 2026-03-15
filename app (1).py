@@ -155,17 +155,18 @@ def ajouter_resultat():
 # Initialisation des données
 participants = ["Amandine", "Sacha", "Padre"]
 grands_prix = [
-    "Bahrein", "Arabie Saoudite", "Australie", "Japon", "Chine", "Miami",
-    "Emilie-Romagne", "Monaco", "Canada", "Espagne", "Autriche", "Grande-Bretagne",
-    "Hongrie", "Belgique", "Pays-Bas", "Italie", "Azerbaidjan", "Singapour",
-    "Etats-Unis", "Mexique", "Bresil", "Las Vegas", "Qatar", "Abu Dhabi"
+    "Australie","Chine", "Japon", "Miami", "Canada",
+    "Monaco", "Barcelone", "Autriche", "Grande-Bretagne", "Belgique", 
+    "Hongrie", "Pays-Bas", "Italie",  "Espagne", "Azerbaidjan", "Singapour",
+    "Etats-Unis", "Mexique", "Bresil", "Las Vegas", "Qatar", "Abu Dhabi",
 ]
 
 pilotes = [
     "Max Verstappen", "Lewis Hamilton", "Charles Leclerc", "Kimi Antonelli", "George Russell",
     "Carlos Sainz", "Lando Norris", "Oscar Piastri", "Fernando Alonso", "Esteban Ocon",
-    "Pierre Gasly", "Lance Stroll", "Kevin Magnussen", "Nico Hulkenberg", "Oliver Bearman",
-    "Jack Doohan", "Yuki Tsunoda", "Liam Lawson", "Alexander Albon", "Isack Hadjar"
+    "Pierre Gasly", "Lance Stroll", "Arvid Lindblad", "Nico Hulkenberg", "Oliver Bearman",
+    "Gabriel Bortoleto", "Franco Colapinto", "Liam Lawson", "Alexander Albon", "Isack Hadjar",
+    "Valteri Bottas", "Sergio Perez",
 ]
 
 # Points attribués par position
