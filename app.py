@@ -135,15 +135,51 @@ def lire_csv_utf8(filename):
     return df
 
 
+def lire_csv_utf8(filename):
+    try:
+        df = pd.read_csv(filename, encoding="utf-8")
+    except FileNotFoundError:
+        return pd.DataFrame()
+    except UnicodeDecodeError:
+        df = pd.read_csv(filename, encoding="ISO-8859-1")
+
+    df.fillna("", inplace=True)
+    return df
+
+
+def lire_csv_utf8(filename):
+    try:
+        df = pd.read_csv(filename, encoding="utf-8")
+    except FileNotFoundError:
+        return pd.DataFrame()
+    except UnicodeDecodeError:
+        df = pd.read_csv(filename, encoding="ISO-8859-1")
+
+    df.fillna("", inplace=True)
+    return df
+
+
 def recalculer_classement():
     pronostics_df = lire_csv_utf8("pronostics.csv")
     resultats_df = lire_csv_utf8("resultats.csv")
 
     colonnes_classement = ["Grand Prix", "Participant", "Points GP", "Bonus", "Total"]
 
-    if pronostics_df.empty or resultats_df.empty:
+    if pronostics_df.empty:
+        print("DEBUG: pronostics.csv est vide")
         pd.DataFrame(columns=colonnes_classement).to_csv("classement.csv", index=False)
+        pd.DataFrame(columns=["Participant", "Total"]).to_csv("classement_general.csv", index=False)
         return
+
+    if resultats_df.empty:
+        print("DEBUG: resultats.csv est vide")
+        pd.DataFrame(columns=colonnes_classement).to_csv("classement.csv", index=False)
+        pd.DataFrame(columns=["Participant", "Total"]).to_csv("classement_general.csv", index=False)
+        return
+
+    pronostics_df["Grand Prix"] = pronostics_df["Grand Prix"].astype(str).str.strip().str.lower()
+    resultats_df["Grand Prix"] = resultats_df["Grand Prix"].astype(str).str.strip().str.lower()
+    pronostics_df["Participant"] = pronostics_df["Participant"].astype(str).str.strip()
 
     classement_lignes = []
 
@@ -151,13 +187,6 @@ def recalculer_classement():
         1: 25, 2: 18, 3: 15, 4: 12, 5: 10,
         6: 8, 7: 6, 8: 4, 9: 2, 10: 1
     }
-
-    # Nettoyage des colonnes Grand Prix
-    if "Grand Prix" in pronostics_df.columns:
-        pronostics_df["Grand Prix"] = pronostics_df["Grand Prix"].astype(str).str.strip()
-
-    if "Grand Prix" in resultats_df.columns:
-        resultats_df["Grand Prix"] = resultats_df["Grand Prix"].astype(str).str.strip()
 
     for _, row in pronostics_df.iterrows():
         gp = str(row.get("Grand Prix", "")).strip()
@@ -169,34 +198,32 @@ def recalculer_classement():
             str(row.get("3e", "")).strip()
         ]
 
-        if not gp or not participant:
-            continue
+        print(f"DEBUG PRONO -> GP={gp} | participant={participant} | pronos={pronos}")
 
         resultat_gp = resultats_df[resultats_df["Grand Prix"] == gp]
+
         if resultat_gp.empty:
+            print(f"DEBUG: aucun résultat trouvé pour {gp}")
             continue
 
         ligne_resultat = resultat_gp.iloc[0]
 
-        # Résultats attendus dans les colonnes pos1 à pos10
         resultats = [
             str(ligne_resultat.get(f"pos{i}", "")).strip()
             for i in range(1, 11)
         ]
         resultats = [r for r in resultats if r]
 
-        if not resultats:
-            continue
+        print(f"DEBUG RESULTAT -> GP={gp} | resultats={resultats}")
 
-        # Points selon la place réelle du pilote
         points = 0
         for pilote in pronos:
             if pilote in resultats:
-                position_reelle = resultats.index(pilote) + 1
-                points += points_f1.get(position_reelle, 0)
+                position = resultats.index(pilote) + 1
+                points += points_f1.get(position, 0)
 
-        # Bonus
         podium_reel = resultats[:3]
+
         if pronos == podium_reel:
             bonus = 10
         elif set(pronos) == set(podium_reel):
@@ -207,7 +234,7 @@ def recalculer_classement():
         total_points = points + bonus
 
         classement_lignes.append({
-            "Grand Prix": gp,
+            "Grand Prix": gp.title(),
             "Participant": participant,
             "Points GP": points,
             "Bonus": bonus,
@@ -228,39 +255,11 @@ def recalculer_classement():
         classement_general_df = pd.DataFrame(columns=["Participant", "Total"])
 
     classement_general_df.to_csv("classement_general.csv", index=False)
-    
 
-@app.route("/ajouter_pronostic", methods=["GET", "POST"])
-@login_requis
-def ajouter_pronostic():
+    print("DEBUG: classement recalculé")
+    print(classement_df)
+    print(classement_general_df)
 
-    if request.method == "POST":
-        gp = request.form.get("grand_prix")
-        participant = session.get("utilisateur")
-
-        p1 = request.form.get("pilote1")
-        p2 = request.form.get("pilote2")
-        p3 = request.form.get("pilote3")
-
-        nouvelle_ligne = pd.DataFrame([{
-            "Grand Prix": gp,
-            "Participant": participant,
-            "1er": p1,
-            "2e": p2,
-            "3e": p3
-        }])
-
-        try:
-            df = pd.read_csv("pronostics.csv")
-            df = pd.concat([df, nouvelle_ligne], ignore_index=True)
-        except:
-            df = nouvelle_ligne
-
-        df.to_csv("pronostics.csv", index=False)
-
-        return redirect(url_for("index"))
-
-    return render_template("ajouter_pronostic.html", grands_prix=grands_prix, pilotes=pilotes)
 
 @app.route("/debug_csv")
 @login_requis
@@ -280,6 +279,7 @@ def debug_csv():
             infos.append(f"<h3>{fichier}</h3><p>Fichier absent</p>")
 
     return "".join(infos)
+
 # ================================
 # 📂 VOIR PRONOSTICS
 # ================================
