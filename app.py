@@ -262,6 +262,24 @@ def ajouter_pronostic():
 
     return render_template("ajouter_pronostic.html", grands_prix=grands_prix, pilotes=pilotes)
 
+@app.route("/debug_csv")
+@login_requis
+def debug_csv():
+    infos = []
+
+    for fichier in ["pronostics.csv", "resultats.csv", "classement.csv", "classement_general.csv"]:
+        if os.path.exists(fichier):
+            try:
+                df = pd.read_csv(fichier)
+                infos.append(f"<h3>{fichier}</h3>")
+                infos.append(f"<p>Nombre de lignes : {len(df)}</p>")
+                infos.append(df.head().to_html(index=False))
+            except Exception as e:
+                infos.append(f"<h3>{fichier}</h3><p>Erreur lecture : {e}</p>")
+        else:
+            infos.append(f"<h3>{fichier}</h3><p>Fichier absent</p>")
+
+    return "".join(infos)
 # ================================
 # 📂 VOIR PRONOSTICS
 # ================================
